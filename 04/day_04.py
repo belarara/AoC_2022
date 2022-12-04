@@ -11,6 +11,6 @@ print(f"1) {count}")
 
 overlaps = 0
 for ((a,b),(c,d)) in pairs_split:
-    if len([a for a in range(a,b+1) if a in list(range(c,d+1))]) > 0:
+    if a<=d and b>=c:
         overlaps += 1
 print(f"2) {overlaps}")
