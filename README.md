@@ -4,7 +4,7 @@
 - Day 2: done
 - Day 3: done
 - Day 4: done
-- Day 5:
+- Day 5: done
 - Day 6:
 - Day 7:
 - Day 8:
