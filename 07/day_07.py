@@ -64,3 +64,50 @@ dir0.get_size()
 children = dir0.get_children()
 print(children)
 print(f"1) {sum([a.get_size() for a in children if a.get_size()<=150000])}")
+
+
+"""
+
+
+
+dirs = {}
+current = ""
+i = 0
+while i<len(lines):
+    cmd = lines[i].split(" ")
+    if cmd[1] == "cd":
+        #print(f"cd: {cmd}")
+        if cmd[2].startswith("/"):
+            current = cmd[2]
+        elif cmd[2] == "..":
+            current = "/".join(current.split("/")[:-1])
+        else:
+            current += cmd[2]+"/"
+    elif cmd[1] == "ls":
+        #print(f"ls: {cmd}")
+        j = 1
+        if current not in dirs:
+            dirs[current] = 0
+        while i+j<len(lines):
+            if not lines[i+j].startswith("$"):
+                sp = lines[i+j].split(" ")
+                if sp[0].isdigit():
+                    dirs[current] += int(sp[0])
+                #print(f"line: {sp}")
+                j+=1
+            else: 
+                break
+        i+=j
+    i+=1
+
+dirs_sub = {}
+for key in dirs.keys():
+    dirs_sub[key] = sum([v for k,v in dirs.items() if k.startswith(key)])
+
+#pretty = json.dumps(dirs_sub, indent=4)
+#print(pretty)
+#print(len(dirs.keys()))
+
+
+print(f"1) {sum([v for v in dirs_sub.values() if v<=100000])}")
+"""
