@@ -9,7 +9,7 @@
 - Day 7: done
 - Day 8: done
 - Day 9: done
-- Day 10:
+- Day 10: done
 - Day 11:
 - Day 12:
 - Day 13:
