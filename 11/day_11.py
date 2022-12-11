@@ -1,64 +1,36 @@
-import copy
-monkeys = {
-    0: {
-        "Starting items": [54,89,94],
-        "Operation": lambda old: old*7,
-        "Test": 17,
-        True: 5,
-        False: 3
-    },
-    1: {
-        "Starting items": [66,71],
-        "Operation": lambda old: old+4,
-        "Test": 3,
-        True: 0,
-        False: 3
-    },
-    2: {
-        "Starting items": [76, 55, 80, 55, 55, 96, 78],
-        "Operation": lambda old: old+2,
-        "Test": 5,
-        True: 7,
-        False: 4
-    },
-    3: {
-        "Starting items": [93, 69, 76, 66, 89, 54, 59, 94],
-        "Operation": lambda old: old+7,
-        "Test": 7,
-        True: 5,
-        False: 2
-    },
-    4: {
-        "Starting items": [80, 54, 58, 75, 99],
-        "Operation": lambda old: old*17,
-        "Test": 11,
-        True: 1,
-        False: 6
-    },
-    5: {
-        "Starting items": [69, 70, 85, 83],
-        "Operation": lambda old: old+8,
-        "Test": 19,
-        True: 2,
-        False: 7
-    },
-    6: {
-        "Starting items": [89],
-        "Operation": lambda old: old+6,
-        "Test": 2,
-        True: 0,
-        False: 1
-    },
-    7: {
-        "Starting items": [62, 80, 58, 57, 93, 56],
-        "Operation": lambda old: old*old,
-        "Test": 13,
-        True: 6,
-        False: 4
-    }
-}
+import copy, re
 
-m = copy.deepcopy(monkeys)
+with open("11/input", "r") as f:
+    data = f.read()
+
+def make_lambda(sign, val):
+    if val.isdigit():
+        val = int(val)
+        if sign == "*":
+            return lambda old: old*val
+        elif sign == "+":
+            return lambda old: old+val
+    else:
+        if sign == "*":
+            return lambda old: old*old
+        elif sign == "+":
+            return lambda old: old+old
+    return lambda old: "_"
+
+def get_monkeys(data):
+    dsp = data.split("\n")
+    monkeys = {}
+    for monkey in range(0,len(dsp)//7):
+        monkeys[monkey] = {}
+        monkeys[monkey]["Starting items"] = list(map(int, re.findall("[0-9]+", dsp[monkey*7+1])))
+        monkeys[monkey]["Test"] = int(dsp[monkey*7+3].split(" ")[-1])
+        monkeys[monkey][True] = int(dsp[monkey*7+4].split(" ")[-1])
+        monkeys[monkey][False] = int(dsp[monkey*7+5].split(" ")[-1])
+        spl = dsp[monkey*7+2].split(" ")
+        monkeys[monkey]["Operation"] = make_lambda(spl[-2], spl[-1])
+    return monkeys
+
+m = get_monkeys(data)
 rounds = 20
 inspections = [0]*len(m)
 for i in range(rounds):
@@ -72,6 +44,7 @@ for i in range(rounds):
 x = sorted(inspections, reverse=True)
 print(f"1) {x[0]*x[1]}")
 
+monkeys = get_monkeys(data)
 rounds = 10000
 modulo = 1
 for v in monkeys.values():
