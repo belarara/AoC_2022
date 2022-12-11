@@ -1,5 +1,3 @@
-import copy, re
-
 with open("11/input", "r") as f:
     data = f.read()
 
@@ -22,7 +20,7 @@ def get_monkeys(data):
     monkeys = {}
     for monkey in range(0,len(dsp)//7):
         monkeys[monkey] = {}
-        monkeys[monkey]["Starting items"] = list(map(int, re.findall("[0-9]+", dsp[monkey*7+1])))
+        monkeys[monkey]["Starting items"] = [int(a[:-1]) if a.endswith(",") else int(a) for a in dsp[monkey*7+1].split(" ")[4:]]
         monkeys[monkey]["Test"] = int(dsp[monkey*7+3].split(" ")[-1])
         monkeys[monkey][True] = int(dsp[monkey*7+4].split(" ")[-1])
         monkeys[monkey][False] = int(dsp[monkey*7+5].split(" ")[-1])
