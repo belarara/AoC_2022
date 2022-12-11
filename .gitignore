@@ -4,3 +4,4 @@ Pipfile.lock
 *.test
 *.old
 .vscode
+*_test.py
