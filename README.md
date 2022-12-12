@@ -11,7 +11,7 @@
 - Day 9: done
 - Day 10: done
 - Day 11: done
-- Day 12:
+- Day 12: done
 - Day 13:
 - Day 14:
 - Day 15:
