@@ -1,5 +1,5 @@
 import numpy as np
-import heapq
+import heapq, time
 
 with open("12/input", "r") as f:
     data = [a for a in f.read().split() if a != ""]
@@ -26,33 +26,39 @@ def distance(a,b):
 def astar_value(point, steps, end):
     return steps + distance(point,end)
 
+st = time.time()
 queue = [(astar_value(start,0,end), start, 0)]
 heapq.heapify(queue)
-visited = {}
-while end not in visited:
+visited = np.full(ar.shape, False)
+visited_steps = np.zeros(ar.shape, dtype=int)
+while not visited[*end]:
     _, curr_pos, steps = heapq.heappop(queue)
-    if curr_pos not in visited:
+    if not visited[*curr_pos]:
         children = get_children(ar, curr_pos)
-        visited[curr_pos] = steps
+        visited[*curr_pos] = True
+        visited_steps[*curr_pos] = steps
         for c in children:
-            if c not in visited:
+            if not visited[*c]:
                 heapq.heappush(queue, (astar_value(c, steps+1, end), c, steps+1))
-print(f"1) {visited[end]}")
+print(f"1) {visited_steps[*end]}")
+ed = time.time()
+print(f"Time: {ed-st}")
 
 queue = [(astar_value(end, 0, start), end, 0)]
 heapq.heapify(queue)
-visited = {}
+visited = np.full(ar.shape, False)
+visited_steps = np.full(ar.shape, 1<<40, dtype=int)
 while len(queue)>0:
     _, curr_pos, steps = heapq.heappop(queue)
-    if curr_pos not in visited:
+    if not visited[*curr_pos]:
         children = get_children(ar, curr_pos, f=lambda a, b: a>=b-1)
-        visited[curr_pos] = steps
+        visited[*curr_pos] = True
+        visited_steps[*curr_pos] = steps
         for c in children:
-            if c not in visited:
+            if not visited[*c]:
                 heapq.heappush(queue, (astar_value(c, steps+1, start), c, steps+1))
-ls = []
-for k,v in visited.items():
-    if ar[k] == 0:
-        ls.append((v,k))
-heapq.heapify(ls)
-print(f"2) {heapq.heappop(ls)[0]}")
+
+x = np.where((ar==0) & visited)
+print(f"2) {np.min(visited_steps[x])}")
+ed2 = time.time()
+print(f"Time: {ed2-ed}")
