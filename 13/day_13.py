@@ -26,14 +26,9 @@ def compare(a,b):
 s = [compare(parse_line(data[i]), parse_line(data[i+1])) for i in range(0,len(data),3)]
 print(f"{sum([i+1 for i,e in enumerate([a==1 for a in s]) if e])}")
 
-data_all = [parse_line(a) for a in data if a.startswith("[")]+[[[2]], [[6]]]
-for i in range(len(data_all)):
-    for j in range(i+1, len(data_all)):
-        if compare(data_all[i], data_all[j])>0:
-            x = data_all[i]
-            data_all[i] = data_all[j]
-            data_all[j] = x
-p = 1
-for i,e in enumerate(reversed(data_all)):
-    if e in [[[2]], [[6]]]: p*=i+1
-print(f"2) {p}")
+data_all = [parse_line(a) for a in data if a.startswith("[")]
+c1,c2 = 1,2
+for i in data_all:
+    c1+=compare(i,[[2]])>0
+    c2+=compare(i,[[6]])>0
+print(f"2) {c1*c2}")
