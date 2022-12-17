@@ -48,51 +48,17 @@ for k, (flow, conn) in binary.items():
     ls = [(1, a) for a in conn]
     while len(ls)>0:
         d, c = ls.pop(0)
-        reached.add(c)
-        if binary[c][0]>0:
+        if c not in reached:
+            reached.add(c)
             reachable[k][c] = d
         ls += [(d+1, a) for a in binary[c][1] if a not in reached and a^k]
 
 has_flow = [k for k,(flow,_) in binary.items() if flow>0]
 start_valve = valves["AA"]["binary"]
-s = {}
-for k,v in valves.items():
-    s[v["binary"]] = k
-
-strn = ""
-for k,v in reachable.items():
-    for o,x in v.items():
-        strn += f"{s[k]},{s[o]},{x}\n"
-
-import graphviz
-
-edges = []
-g = graphviz.Graph()
-g.attr(size='6,6')
-for k,d in valves.items():
-    for c in d["connections"]:
-        if not (k,c) in edges and not (c,k) in edges:
-            edges.append((k,c))
-for a,b in edges:
-    g.edge(a,b)
-
-g.view()
-
-
-with open("16/output", "w") as f:
-    f.write(strn)
-
-
-
-print(start_valve)
-for k in sorted(reachable.keys(), key=lambda a: s[a]):
-    print(f"{s[k]}: ", end="")
-    for o in sorted(reachable[k].keys()):
-        print(f"{s[o]}, ", end=" ")
-    print()
 
 end = 26
 states = deque()
+states_old = deque()
 for i in has_flow:
     for j in has_flow:
         if i!=j:
@@ -100,48 +66,80 @@ for i in has_flow:
             times = (reachable[start_valve][i]+1, reachable[start_valve][j]+1)
             opened = i|j
             pressure = binary[i][0]*(end-(times[0])) + binary[j][0]*(end-(times[1]))
-            states.append((position, times, opened, pressure))
+            states.append((position, times, opened, pressure, 0))
 
+visual = False # set to true for graph and console output
+full_open = sum(has_flow)
 visited = {}
-end = 26
-best_state = 0
-counter,modulo = 0, 100000
+best_state = (0,0,0,0,0)
+counter = -1
 while len(states)>0:
     counter += 1
-    valve, times, opened, pressure = states.popleft()
-    #if counter%modulo == 0: print(counter, valve, times, opened, pressure, len(visited), len(states))
+    valve, times, opened, pressure, ct = states.popleft()
+    if visual: states_old.append((valve, times, opened, pressure, ct))
+    if best_state[3]<pressure:
+        best_state = valve, times, opened, pressure, ct
     if ((valve[0] | valve[1]), opened) in visited and visited[((valve[0] | valve[1]), opened)] >= pressure:
         continue
     visited[((valve[0] | valve[1]), opened)] = pressure
-
-    is_open = False
-    for a in has_flow:
-        if not a & opened:
-            is_open = True
-            break
-    if not is_open:
-        if best_state<pressure:
-            best_state = pressure
+    if not opened ^ full_open:
         continue
 
     (valve_me, valve_ele), (time_me, time_ele) = valve, times
-    for i in range(2):
-        if i==1: (valve_ele, valve_me), (time_ele, time_me) = valve, times
-        for cl in has_flow:
-            if cl & opened:
-                continue
-            cost = reachable[valve_me][cl]+1
-            steps_to_end = (end - (time_me + cost))
-            new_pressure = binary[cl][0]*steps_to_end
-            if ((cl | valve_ele), opened) in visited and visited[((cl | valve_ele), opened)] >= pressure+new_pressure:
-                continue
-            if steps_to_end>0:
-                states.append(((valve_ele, cl), (time_ele, time_me+cost), opened|cl, new_pressure + pressure))
-            elif best_state<new_pressure+pressure:
-                best_state =new_pressure + pressure
-        
-    #print(valve, times, opened, pressure, new_states)
+    for cl in has_flow:
+        if cl & opened:
+            continue
+        cost = reachable[valve_me][cl]+1
+        steps_to_end = (end - (time_me + cost))
+        new_pressure = binary[cl][0]*steps_to_end
+        if ((cl | valve_ele), opened) in visited and visited[((cl | valve_ele), opened)] >= pressure:
+            continue
+        if best_state[3] <= new_pressure+pressure:
+            best_state = ((cl, valve_ele), (time_me+cost, time_ele), opened|cl, new_pressure + pressure, counter)
+        if steps_to_end>=0:
+            states.append(((cl, valve_ele), (time_me+cost, time_ele), opened|cl, new_pressure + pressure, counter))
 
-print(f"2) {best_state}")
+    for cl in has_flow:
+        if cl & opened:
+            continue
+        cost = reachable[valve_ele][cl]+1
+        steps_to_end = (end - (time_ele + cost))
+        new_pressure = binary[cl][0]*steps_to_end
+        if ((cl | valve_me), opened) in visited and visited[((cl | valve_me), opened)] >= pressure:
+            continue
+        if best_state[3] <= new_pressure+pressure:
+            best_state = ((valve_me, cl), (time_me, time_ele+cost), opened|cl, new_pressure + pressure, counter)
+        if steps_to_end>=0:
+            states.append(((valve_me, cl), (time_me, time_ele+cost), opened|cl, new_pressure + pressure, counter))
+
+print(f"2) {best_state[3]}")
 t2 = time.time()
 print(f"Time: {t2-t1}")
+
+if visual:
+    rev = {}
+    for k,v in valves.items():
+        rev[v["binary"]] = k
+
+    import graphviz
+
+    edges = []
+    g = graphviz.Graph()
+    g.attr(size='6,6')
+    for k,d in valves.items():
+        for c in d["connections"]:
+            p,q = f"{k}+{d['flow']}", f"{c}+{valves[c]['flow']}"
+            if not (p,q) in edges and not (q,p) in edges:
+                edges.append((q,p))
+    for a,b in edges:
+        g.edge(a,b)
+    g.view()
+
+    # show best path:
+    (pos1, pos2), (ts1, ts2), opened, pressure, counter= best_state
+    while counter != 0:
+        s1 = f"({rev[pos1]}, {rev[pos2]}) // {(ts1, ts2)}"
+        s2 = f"{' '*(20-len(bin(opened)[2:]))}{bin(opened)[2:]} // {pressure}"
+        print(f"{s1} // {' '*(40-len(s1))} // {s2}")
+        (pos1, pos2), (ts1, ts2), opened, pressure, counter = states_old[counter]
+    print(f"({rev[pos1]}, {rev[pos2]}) // {(ts1, ts2)} // {bin(opened)[2:]} // {pressure}")
