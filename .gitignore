@@ -5,3 +5,6 @@ Pipfile.lock
 *.old
 .vscode
 *_test.py
+output
+*.gv
+*.pdf
