@@ -1,4 +1,3 @@
-from collections import deque
 from sympy import Symbol, Eq, solve
 with open("21/input", "r") as f:
     data = f.read()
