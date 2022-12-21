@@ -31,4 +31,4 @@ for i in range(9):
 
 task2 = perm(task2, permutation)
 values = [(task2.index(0)+a)%(len(task2)) for a in [1000,2000,3000]]
-print(f"1) {sum([task2[v] for v in values])}")
+print(f"2) {sum([task2[v] for v in values])}")
