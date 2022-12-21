@@ -19,7 +19,7 @@
 - Day 17: done
 - Day 18: done
 - Day 19: done (slow)
-- Day 20:
+- Day 20: done
 - Day 21:
 - Day 22:
 - Day 23:
