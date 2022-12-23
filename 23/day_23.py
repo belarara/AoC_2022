@@ -1,3 +1,4 @@
+import time
 with open("23/input", "r") as f:
     data = f.read()
 
@@ -39,14 +40,14 @@ def propose(field, step):
         for j in range(len(field[0])):
             if field[i][j] and any([get_point(field, (i,j), surr_p) for surr_p in surround]):
                 for dir_points in [directions[(step+m)%4] for m in range(4)]:
-                    ls = [not get_point(field, (i,j), point) for point in dir_points]
-                    if all(ls):
+                    if all([not get_point(field, (i,j), point) for point in dir_points]):
                         new_pos = (i+dir_points[1][0], j+dir_points[1][1])
                         if new_pos not in proposals: proposals[new_pos] = (i,j)
                         else: del proposals[new_pos]
                         break
     return proposals
 
+t1=time.time()
 field_v1 = reduce(field)
 for i in range(10):
     field_v1 = expand(field_v1)
@@ -54,6 +55,7 @@ for i in range(10):
     for (x,y),(p,q) in props.items():
         field_v1[x][y], field_v1[p][q] = True, False
 print(f"1) {sum([sum([not a for a in row]) for row in reduce(field_v1)])}")
+t2=time.time()
 
 field_v2 = field
 count = 0
@@ -66,3 +68,59 @@ while len(props)>0:
         field_v2[x][y], field_v2[p][q] = True, False
     count += 1
 print(f"2) {count}")
+t3=time.time()
+
+def point_add(p1,p2):
+    return (p1[0]+p2[0], p1[1]+p2[1])
+
+def move_elves(elves, round):
+    new_positions = {}
+    for elf in elves:
+        if all([(point_add(elf, surr) not in elves) for surr in surround]):
+            new_positions[elf] = elf
+        else:
+            moved = False
+            for dirs in [directions[(round+m)%4] for m in range(4)]:
+                if all([(point_add(elf, d) not in elves) for d in dirs]):
+                    moved = True
+                    np = point_add(elf,dirs[1])
+                    if np not in new_positions: new_positions[np] = elf
+                    else:
+                        new_positions[new_positions[np]] = new_positions[np]
+                        del new_positions[np]
+                        new_positions[elf] = elf
+                    break
+            if not moved:
+                new_positions[elf] = elf
+    ret = set(new_positions.keys())
+    return ret, elves!=ret
+
+def get_empty_squares(elves):
+    _x,x_ = min(elves, key=lambda o:o[0])[0],max(elves, key=lambda o:o[0])[0]
+    _y,y_ = min(elves, key=lambda o:o[1])[1],max(elves, key=lambda o:o[1])[1]
+    return (x_-_x+1)*(y_-_y+1)-len(elves)
+
+t4=time.time()
+elves = set()
+for i in range(len(field)):
+    for j in range(len(field[0])):
+        if field[i][j]:
+            elves.add((i,j))
+
+for i in range(10):
+    elves, _ = move_elves(elves, i)
+print(f"1) {get_empty_squares(elves)}")
+t5=time.time()
+
+changed = True
+while changed:
+    i+=1
+    elves, changed = move_elves(elves, i)
+print(f"2) {i+1}")
+t6=time.time()
+
+print("times")
+print(f"1 grid) {t2-t1}")
+print(f"2 grid) {t3-t2}")
+print(f"1 set)  {t5-t4}")
+print(f"2 set)  {t6-t5}")
