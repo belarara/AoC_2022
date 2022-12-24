@@ -23,4 +23,5 @@
 - Day 21: done
 - Day 22: done
 - Day 23: done
-- Day 24:
+- Day 24: done
+- Day 25:
