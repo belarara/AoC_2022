@@ -41,11 +41,11 @@ def prt(bliz, pos, mx, my):
     return "\n".join(["".join(a) for a in ls])
 
 
-def next_possible(next_bliz, pos, mx, my):
+def next_possible(next_bliz, pos, mx, my, start, end):
     allowed = [pos]+[(pos[0]+x, pos[1]+y) for x,y in direction]
     possible = []
     for px,py in allowed:
-        if (px>0 and py>0 and px<mx-1 and py<my-1 and (px,py) not in next_bliz) or ((px,py) in [(0,1),(mx-1,my-2)]):
+        if (px>0 and py>0 and px<mx-1 and py<my-1 and (px,py) not in next_bliz) or ((px,py) in [start,end]):
             possible.append((px,py))
     return possible
 
@@ -67,7 +67,7 @@ for i in range(repeat):
     blizzard_round.append(animate_blizzard(blizzard_round[-1], max_x, max_y))
     if blizzard_round[-1]==blizzard_round[0] and i<repeat:
         repeat = i+1
-
+        break
 
 def walk_fastest(states, blizzard_rounds, mx, my, end):
     repeat = len(blizzard_round)
@@ -80,7 +80,7 @@ def walk_fastest(states, blizzard_rounds, mx, my, end):
         if ((curr_x, curr_y), minute%repeat) in visited:
             continue
         visited.add(((curr_x, curr_y), minute%repeat))
-        next_pos = next_possible(blizzard_rounds[(minute+1)%repeat], (curr_x, curr_y), mx, my)
+        next_pos = next_possible(blizzard_rounds[(minute+1)%repeat], (curr_x, curr_y), mx, my, start, end)
         for x,y in next_pos:
             if ((x,y), (minute+1)%repeat) not in visited:
                 heapq.heappush(states, (minute+1+distance((x,y), end), ((x,y), minute+1)))
