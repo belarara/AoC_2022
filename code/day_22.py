@@ -172,5 +172,5 @@ def draw_maze(maze, path_taken):
     return s
 
 if verbose:
-    with open("22/maze.txt", "w") as f:
+    with open("out/maze.txt", "w") as f:
         f.write(draw_maze(maze, took))
